@@ -1,0 +1,18 @@
+name: Android 17 Aperture legacy-source isolation audit
+
+on:
+  push:
+    branches:
+      - audit/a17-mondrian-aperture-20261104
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  historical-source-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check 2024 historical Soong, Gradle, manifest and vendored libraries
+        run: python3 tools/verify_a17_aperture_legacy.py
