@@ -19,12 +19,16 @@ runs:
       shell: bash
       run: |
         ./gradlew app:generateBp
-        if [[ ! -z $(git status -s) ]]; then
-          git status
-          exit -1
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "::error::generateBp changed tracked generated Soong/library/license files"
+          git status --short
+          git diff --stat
+          git diff -- app/libs/Android.bp | sed -n '1,180p'
+          exit 1
         fi
 
     - uses: actions/upload-artifact@v4
+      if: ${{ always() }}
       with:
         name: app-debug.apk
         path: app/build/outputs/apk/debug/app-debug.apk
