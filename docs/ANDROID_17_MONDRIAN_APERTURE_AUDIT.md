@@ -49,6 +49,12 @@ These comparisons are *source/configuration observations*, not proof that one ve
 - [ ] Validate runtime camera/photo/video/QR/secure capture on mondrian.
 - [ ] Only then create a separate opt-in manifest profile pinned to an immutable candidate commit, with targeted sync + joint profile CI.
 
+## Historical Gradle build observation (not Android17)
+
+On 2026-11-04, GitHub Actions run [41744997695](https://github.com/PixelExperience-Reborn/packages_apps_Aperture/actions/runs/41744997695) used the historical Gradle 8.5 + Java 17 configuration. **`./gradlew assembleDebug` PASS** (64 tasks) and **`./gradlew app:generateBp` PASS**, but overall **workflow FAIL** at the deliberately strict generated-file reproducibility check: `app/libs/Android.bp` and multiple tracked `*.license` metadata files changed. The initial workflow also used retired `actions/upload-artifact@v3`, which was updated in this audit branch. The subsequent workflow is configured to report the generated Soong diff and preserve build artifacts for diagnosis even when this integrity check fails.
+
+This establishes that the historical Gradle APK compiles; it **does not** establish that its generated `Android.bp` matches the committed source, that its AAR/JAR license metadata is reproducible, that it compiles with Soong/Android17 API 37, or that it works on mondrian. Reconcile generated output and licenses from reviewed sources; do not bypass the git-dirty failure or commit automatic metadata changes without verifying dependency provenance.
+
 ## What the audit CI does and does not prove
 
 The host check verifies historical file/Soong/manifest invariants and existence of checked-in AAR/JAR dependencies. It is **not** an Android build, a dependency-resolution proof against AOSP17, a camera runtime test, or a claim that the app has been ported. This branch changes no app runtime sources. It must not be merged into a release source graph as if it were a working A17 camera.
